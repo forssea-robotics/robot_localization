@@ -520,6 +520,10 @@ template<class T> class RosFilter
     //!
     std::string mapFrameId_;
 
+    //! @brief tf frame name for the robot's navigation frame
+    //!
+    std::string navFrameId_;
+
     //! @brief tf frame name for the robot's odometry (world-fixed) frame
     //!
     std::string odomFrameId_;

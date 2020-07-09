@@ -762,6 +762,7 @@ namespace RobotLocalization
     // These params specify the name of the robot's body frame (typically
     // base_link) and odometry frame (typically odom)
     nhLocal_.param("map_frame", mapFrameId_, std::string("map"));
+    nhLocal_.param("nav_frame", navFrameId_, std::string("nav"));
     nhLocal_.param("odom_frame", odomFrameId_, std::string("odom"));
     nhLocal_.param("base_link_frame", baseLinkFrameId_, std::string("base_link"));
     nhLocal_.param("base_link_frame_output", baseLinkOutputFrameId_, baseLinkFrameId_);
@@ -1952,13 +1953,21 @@ namespace RobotLocalization
             tf2::Transform mapOdomTrans;
             mapOdomTrans.mult(worldBaseLinkTrans, baseLinkOdomTrans);
 
-            geometry_msgs::TransformStamped mapOdomTransMsg;
+            geometry_msgs::TransformStamped mapOdomTransMsg, baseLinkNavTransMsg;
             mapOdomTransMsg.transform = tf2::toMsg(mapOdomTrans);
             mapOdomTransMsg.header.stamp = filteredPosition.header.stamp + tfTimeOffset_;
             mapOdomTransMsg.header.frame_id = mapFrameId_;
             mapOdomTransMsg.child_frame_id = odomFrameId_;
+            baseLinkNavTransMsg.transform = tf2::toMsg(worldBaseLinkTrans);
+            baseLinkNavTransMsg.transform.translation.x = 0;
+            baseLinkNavTransMsg.transform.translation.z = 0;
+            baseLinkNavTransMsg.transform.translation.x = 0;
+            baseLinkNavTransMsg.transform.rotation.w *= -1;
+            baseLinkNavTransMsg.header.stamp = filteredPosition.header.stamp + tfTimeOffset_;
+            baseLinkNavTransMsg.header.frame_id = baseLinkFrameId_;
+            baseLinkNavTransMsg.child_frame_id = navFrameId_;
 
-            worldTransformBroadcaster_.sendTransform(mapOdomTransMsg);
+            worldTransformBroadcaster_.sendTransform({mapOdomTransMsg, baseLinkNavTransMsg});
           }
           catch(...)
           {
